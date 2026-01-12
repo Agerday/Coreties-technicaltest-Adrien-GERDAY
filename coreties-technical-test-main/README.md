@@ -78,3 +78,57 @@ DuckDB date functions: [duckdb.org/docs/sql/functions/date](https://duckdb.org/d
 ### Context
 
 [Coreties](https://www.coreties.com/) analyzes shipment customs data. A "shipment" = goods moving from an exporter (seller) to an importer (buyer) across countries.
+
+### What Was Implemented
+
+1. **Company Model + Related Models**
+    - Company, TradingPartner, Commodity, CompanyStats, TopCommodity, MonthlyVolume
+
+2. **Database Queries (SQL with DuckDB)**
+
+   **`transformShipmentsToCompanies()`**
+    * Aggregates shipments into company records
+    * Groups by company name, country, website
+    * Calculates total shipments and weight
+    * Orders by shipment count DESC
+
+   **`getCompanyStats()`**
+    * Counts distinct importers and exporters
+    * Returns dashboard statistics
+
+   **`getTopCommodities()`**
+    * Aggregates commodities by total weight
+    * Returns top 5 (configurable)
+    * Orders by weight DESC
+
+   **`getMonthlyVolume()`**
+    * Groups shipments by month
+    * Last 6 months of data (configurable)
+    * Uses `strftime()` for date formatting
+    * Returns chronological order
+
+   **`getCompanyDetail()`**
+    * Fetches complete company information
+    * Top 3 trading partners (by shipment count)
+    * Top 3 commodities (by weight)
+    * SQL injection protection via quote escaping
+
+3. **API Endpoints**
+    * `GET /api/companies/companies` - List all companies
+    * `GET /api/companies/[name]` - Company detail
+    * `GET /api/stats` - Dashboard statistics
+
+4. **Wired Real Data to UI**
+    - Companies dashboard with live SQL data
+
+5. **Virtual Scrolling (Production-Ready)**
+    * Uses `@tanstack/react-virtual`
+    * Infinite scroll - Loads 50 rows at a time
+    * AbortController - Cancels stale requests
+    * Ref-based state - Stable callbacks (`loadingRef`, `hasMoreRef`, `offsetRef`)
+    * Performance - Renders only ~20 visible rows instead of 5000
+
+6. **Testing with Vitest**
+    * 6 critical tests covering SQL, API, and security
+    * SQL injection protection validated
+    * HTTP method validation
